@@ -1,0 +1,4 @@
+clickbench/
+venv/
+.cli_version.cache
+

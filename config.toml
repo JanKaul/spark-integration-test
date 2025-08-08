@@ -1,0 +1,21 @@
+default_connection_name = "local"
+
+[cli]
+ignore_new_version_warning = false
+
+[cli.logs]
+save_logs = true
+path = "/tmp/test-embucket/logs"
+level = "info"
+
+[connections.local]
+host = "localhost"
+region = "us-east-2"
+port = 3000
+protocol = "http"
+database = "embucket"
+schema = "public"
+warehouse = "COMPUTE_WH"
+account = "test"
+user = "embucket"
+password = "embucket"
