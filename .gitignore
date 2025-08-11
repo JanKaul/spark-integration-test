@@ -1,4 +1,5 @@
-clickbench/
+clickbench/single
+clickbench/partitioned
 venv/
 .cli_version.cache
 

@@ -11,7 +11,7 @@ def create_spark_session():
     
     return spark
 
-def load_parquet_and_create_iceberg_table(spark, parquet_path="/home/iceberg/partitioned", table_name="demo.public.hits"):
+def load_parquet_and_create_iceberg_table(spark, parquet_path="/home/iceberg/partitioned", table_name="demo.spark.hits"):
     """Load parquet files and create Iceberg table"""
     
     # Read all parquet files from the partitioned folder
@@ -23,7 +23,7 @@ def load_parquet_and_create_iceberg_table(spark, parquet_path="/home/iceberg/par
     
     print(f"Total rows: {df.count()}")
     
-    spark.sql("CREATE SCHEMA IF NOT EXISTS demo.public;")
+    spark.sql("CREATE SCHEMA IF NOT EXISTS demo.spark;")
 
     # Create Iceberg table
     print(f"Creating Iceberg table: {table_name}")
