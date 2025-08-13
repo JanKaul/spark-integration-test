@@ -5,6 +5,7 @@ This project provides a test framework for running integration tests between Sno
 ## Overview
 
 The test framework consists of two main scripts:
+
 - `make.sh` - Core utilities for Snowflake setup and data operations
 - `clickbench.sh` - ClickBench dataset management and benchmarking
 
@@ -17,16 +18,19 @@ The test framework consists of two main scripts:
 ## Quick Start
 
 1. Start Docker services:
+
    ```bash
    sh make.sh up
    ```
 
-2. Initialize Snowflake setup:
+2. Initialize database, schema setup:
+
    ```bash
    sh make.sh setup
    ```
 
 3. Load ClickBench data:
+
    ```bash
    sh clickbench.sh clickbench_partitioned
    ```
@@ -42,7 +46,7 @@ The test framework consists of two main scripts:
 - `sh make.sh volume_file` - Create file-based external volume
 - `sh make.sh database` - Create demo database
 - `sh make.sh schema` - Create schema
-- `sh make.sh setup` - Run complete Snowflake setup
+- `sh make.sh setup` - Run complete database, schema setup
 - `sh make.sh snow_sql "query"` - Execute Snowflake SQL
 - `sh make.sh spark_sql "query"` - Execute Spark SQL
 - `sh make.sh equality table1 table2` - Compare data between tables
@@ -65,26 +69,28 @@ Test files should follow the pattern in `tests/example.sh`:
 
 ```bash
 #!/bin/bash
+source ./make.sh
+source ./clickbench.sh
 
 # Start services
-sh make.sh up
+up
 
 # Initialize Snowflake
-sh make.sh setup
+setup
 
 # Load test data
-sh clickbench.sh clickbench_partitioned
-sh clickbench.sh clickbench_spark_partitioned
+clickbench_partitioned
+clickbench_spark_partitioned
 
 # Run test queries
-sh make.sh snow_sql "SELECT watchid FROM demo.spark.hits LIMIT 100;"
-sh make.sh spark_sql "SELECT watchid FROM demo.embucket.hits LIMIT 100;"
+snow_sql "SELECT watchid FROM demo.spark.hits LIMIT 100;"
+spark_sql "SELECT watchid FROM demo.embucket.hits LIMIT 100;"
 
 # Verify data equality
-sh make.sh equality demo.embucket.hits demo.spark.hits
+equality demo.embucket.hits demo.spark.hits
 
 # Cleanup
-sh make.sh down
+down
 ```
 
 ### Test File Structure
@@ -106,6 +112,7 @@ sh make.sh down
 ## Storage Configuration
 
 Two storage types are configured:
+
 - **S3 storage** (`mybucket`) - MinIO-based object storage
 - **File storage** (`local`) - Local filesystem access
 
@@ -114,11 +121,13 @@ Both point to the same data location for testing different ingestion paths.
 ## Usage Examples
 
 ### Basic Integration Test
+
 ```bash
 sh tests/example.sh
 ```
 
 ### Custom Test Creation
+
 ```bash
 # Create new test file
 cp tests/example.sh tests/my_test.sh
@@ -128,6 +137,7 @@ sh tests/my_test.sh
 ```
 
 ### Manual Operations
+
 ```bash
 # Start only the infrastructure
 sh make.sh up
@@ -150,5 +160,7 @@ sh make.sh down
 ## Environment Variables
 
 The scripts automatically handle:
+
 - `SNOWFLAKE_HOME` - Set to current project directory
 - Virtual environment activation via `venv.sh`
+
