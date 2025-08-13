@@ -1,23 +1,16 @@
 export SNOWFLAKE_HOME=$(pwd)
 
-venv() {
-  if [ ! -d "venv" ]; then python -m venv venv; fi
-}
-
-activate() {
-  venv
-  if [ -z "$VIRTUAL_ENV" ]; then . venv/bin/activate; fi
-}
+source ./venv.sh
 
 install_snowflake() {
   pip install snowflake-cli
 }
 
-docker_up() {
+up() {
   docker compose up -d
 }
 
-docker_down() {
+down() {
   docker compose down -v
 }
 
@@ -75,8 +68,8 @@ spark_sql() {
 }
 
 equality() {
-  spark_query "select sum(hash(*)) from $1"
-  spark_query "select sum(hash(*)) from $2"
+  spark_sql "select sum(hash(*)) from $1"
+  spark_sql "select sum(hash(*)) from $2"
 }
 
 activate

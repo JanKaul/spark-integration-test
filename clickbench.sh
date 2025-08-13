@@ -1,3 +1,7 @@
+export SNOWFLAKE_HOME=$(pwd)
+
+source ./venv.sh
+
 if [ ! -d "clickbench" ]; then
   mkdir clickbench
   mkdir -p clickbench/partitioned
@@ -123,13 +127,52 @@ cb_create_table() {
 );"
 }
 
-cb_copy_into_n() {
-  local N=$1
-  snow sql -q "COPY INTO demo.embucket.hits FROM 'file:///storage/clickbench/partitioned/hits_$N.parquet' STORAGE_INTEGRATION = local FILE_FORMAT = (TYPE = PARQUET);"
+cb_copy_into_partitioned_small() {
+  snow sql -q "COPY INTO demo.embucket.hits FROM 'file:///storage/clickbench/partitioned/hits_0.parquet' STORAGE_INTEGRATION = local FILE_FORMAT = (TYPE = PARQUET);"
 }
 
-cb_spark_create_table() {
+cb_copy_into_partitioned() {
+  snow sql -q "COPY INTO demo.embucket.hits FROM 'file:///storage/clickbench/partitioned/' STORAGE_INTEGRATION = local FILE_FORMAT = (TYPE = PARQUET);"
+}
+
+cb_copy_into_single() {
+  snow sql -q "COPY INTO demo.embucket.hits FROM 'file:///storage/clickbench/single/' STORAGE_INTEGRATION = local FILE_FORMAT = (TYPE = PARQUET);"
+}
+
+clickbench_partitioned() {
+  cb_create_table
+  cb_copy_into_partitioned
+}
+
+clickbench_partitioned_small() {
+  cb_create_table
+  cb_copy_into_partitioned_small
+}
+
+clickbench_single() {
+  cb_create_table
+  cb_copy_into_single
+}
+
+clickbench_spark_partitioned() {
   docker exec spark-iceberg spark-submit /home/iceberg/create_iceberg.py
 }
+
+benchmark() {
+  echo "query_number,execution_time_seconds" >clickbench/results.csv
+  query_num=1
+  cat clickbench/queries.sql | while read -r query; do
+    if [[ -n "$query" && ! "$query" =~ ^[[:space:]]*$ ]]; then
+      start_time=$(date +%s.%N)
+      snow sql -q "$query"
+      end_time=$(date +%s.%N)
+      execution_time=$(awk "BEGIN {print $end_time - $start_time}")
+      echo "$query_num,$execution_time" >>clickbench/results.csv
+      query_num=$((query_num + 1))
+    fi
+  done
+}
+
+activate
 
 if [ -n "$1" ]; then "$1" "${2:0}"; fi

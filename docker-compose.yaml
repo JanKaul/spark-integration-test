@@ -70,7 +70,7 @@ services:
       - S3_ENDPOINT=http://warehouse.minio:9000
       - S3_ALLOW_HTTP=true
       - CATALOG_URL=http://embucket:3000/catalog
-      - RUST_LOG=debug
+      - RUST_LOG=info
     volumes:
       - tmp_data:/tmp
       - ./clickbench/partitioned:/storage/clickbench/partitioned
