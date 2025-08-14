@@ -154,8 +154,12 @@ clickbench_single() {
   cb_copy_into_single
 }
 
-clickbench_spark_partitioned() {
+clickbench_spark() {
   docker exec spark-iceberg spark-submit /home/iceberg/create_iceberg.py
+}
+
+clickbench_spark_partitioned() {
+  docker exec spark-iceberg spark-submit /home/iceberg/create_iceberg_partitioned.py
 }
 
 benchmark() {

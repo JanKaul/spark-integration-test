@@ -13,6 +13,7 @@ services:
       - notebooks_data:/home/iceberg/notebooks/notebooks
       - spark_events:/home/iceberg/spark-events
       - ./scripts/create_iceberg.py:/home/iceberg/create_iceberg.py
+      - ./scripts/create_iceberg_partitioned.py:/home/iceberg/create_iceberg_partitioned.py
       - ./clickbench/partitioned:/home/iceberg/partitioned
       - ./clickbench/single:/home/iceberg/single
     environment:
