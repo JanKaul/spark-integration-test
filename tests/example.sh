@@ -7,8 +7,8 @@ setup
 clickbench_partitioned
 clickbench_spark_partitioned
 
-snow_sql "SELECT watchid FROM demo.spark.hits LIMIT 100;"
-spark_sql "SELECT watchid FROM demo.embucket.hits LIMIT 100;"
+snowsql "SELECT watchid FROM demo.spark.hits LIMIT 100;"
+sparksql "SELECT watchid FROM demo.embucket.hits LIMIT 100;"
 
 equality demo.embucket.hits demo.spark.hits
 

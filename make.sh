@@ -32,7 +32,7 @@ volume() {
   )"
 }
 
-volume_file() {
+volume_local() {
   snow sql -q "CREATE EXTERNAL VOLUME 'local'
   STORAGE_LOCATIONS = 
   (
@@ -48,22 +48,57 @@ database() {
   snow sql -q "CREATE DATABASE demo EXTERNAL_VOLUME = 'mybucket';"
 }
 
+volume_file() {
+  snow sql -q "CREATE EXTERNAL VOLUME 'file'
+  STORAGE_LOCATIONS = 
+  (
+    (
+      NAME = 'file'
+      STORAGE_PROVIDER = 'file'
+      STORAGE_BASE_URL = '$(pwd)/storage'
+    )
+  )"
+}
+
+volume_file_clickbench() {
+  snow sql -q "CREATE EXTERNAL VOLUME 'local'
+  STORAGE_LOCATIONS = 
+  (
+    (
+      NAME = 'local'
+      STORAGE_PROVIDER = 'file'
+      STORAGE_BASE_URL = '$(pwd)/clickbench'
+    )
+  )"
+}
+
+database_file() {
+  snow sql -q "CREATE DATABASE demo EXTERNAL_VOLUME = 'file';"
+}
+
 schema() {
   snow sql -q "CREATE SCHEMA demo.embucket;"
 }
 
 setup() {
   volume
-  volume_file
+  volume_local
   database
   schema
 }
 
-snow_sql() {
+setup_file() {
+  volume_file
+  volume_file_clickbench
+  database_file
+  schema
+}
+
+snowsql() {
   snow sql -q "$1"
 }
 
-spark_sql() {
+sparksql() {
   docker exec spark-iceberg spark-sql -e "$1"
 }
 

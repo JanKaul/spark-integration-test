@@ -139,6 +139,10 @@ cb_copy_into_single() {
   snow sql -q "COPY INTO demo.embucket.hits FROM 'file:///storage/clickbench/single/' STORAGE_INTEGRATION = local FILE_FORMAT = (TYPE = PARQUET);"
 }
 
+cb_copy_into_partitioned_file() {
+  snow sql -q "COPY INTO demo.embucket.hits FROM 'file://$(pwd)/clickbench/partitioned/' STORAGE_INTEGRATION = local FILE_FORMAT = (TYPE = PARQUET);"
+}
+
 clickbench_partitioned() {
   cb_create_table
   cb_copy_into_partitioned

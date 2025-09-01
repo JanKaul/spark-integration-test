@@ -47,8 +47,8 @@ The test framework consists of two main scripts:
 - `sh make.sh database` - Create demo database
 - `sh make.sh schema` - Create schema
 - `sh make.sh setup` - Run complete database, schema setup
-- `sh make.sh snow_sql "query"` - Execute Snowflake SQL
-- `sh make.sh spark_sql "query"` - Execute Spark SQL
+- `sh make.sh snowsql "query"` - Execute Snowflake SQL
+- `sh make.sh sparksql "query"` - Execute Spark SQL
 - `sh make.sh equality table1 table2` - Compare data between tables
 
 ### clickbench.sh Commands
@@ -83,8 +83,8 @@ clickbench_partitioned
 clickbench_spark_partitioned
 
 # Run test queries
-snow_sql "SELECT watchid FROM demo.spark.hits LIMIT 100;"
-spark_sql "SELECT watchid FROM demo.embucket.hits LIMIT 100;"
+snowsql "SELECT watchid FROM demo.spark.hits LIMIT 100;"
+sparksql "SELECT watchid FROM demo.embucket.hits LIMIT 100;"
 
 # Verify data equality
 equality demo.embucket.hits demo.spark.hits
@@ -147,8 +147,8 @@ sh make.sh setup
 sh clickbench.sh clickbench_single
 
 # Run custom queries
-sh make.sh snow_sql "SELECT COUNT(*) FROM demo.embucket.hits"
-sh make.sh spark_sql "SELECT COUNT(*) FROM demo.spark.hits"
+sh make.sh snowsql "SELECT COUNT(*) FROM demo.embucket.hits"
+sh make.sh sparksql "SELECT COUNT(*) FROM demo.spark.hits"
 
 # Compare results
 sh make.sh equality demo.embucket.hits demo.spark.hits
@@ -163,4 +163,3 @@ The scripts automatically handle:
 
 - `SNOWFLAKE_HOME` - Set to current project directory
 - Virtual environment activation via `venv.sh`
-
