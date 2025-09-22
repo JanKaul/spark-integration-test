@@ -60,18 +60,6 @@ volume_file() {
   )"
 }
 
-volume_file_clickbench() {
-  snow sql -q "CREATE EXTERNAL VOLUME 'local'
-  STORAGE_LOCATIONS = 
-  (
-    (
-      NAME = 'local'
-      STORAGE_PROVIDER = 'file'
-      STORAGE_BASE_URL = '$(pwd)/clickbench'
-    )
-  )"
-}
-
 database_file() {
   snow sql -q "CREATE DATABASE demo EXTERNAL_VOLUME = 'file';"
 }
@@ -89,7 +77,6 @@ setup() {
 
 setup_file() {
   volume_file
-  volume_file_clickbench
   database_file
   schema
 }

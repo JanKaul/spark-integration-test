@@ -9,7 +9,7 @@ path = "/tmp/test-embucket/logs"
 level = "info"
 
 [connections.local]
-host = "localhost"
+host = "127.0.0.1"
 region = "us-east-2"
 port = 3000
 protocol = "http"
@@ -19,3 +19,4 @@ warehouse = "COMPUTE_WH"
 account = "test"
 user = "embucket"
 password = "embucket"
+socket_timeout = 1200

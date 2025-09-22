@@ -1,10 +1,11 @@
 source ./make.sh
 source ./clickbench.sh
 
-up
-setup
+setup_file
+volume_local_file
 
-clickbench_partitioned
+cb_create_table
+cb_copy_into_partitioned_file
 
 echo "query_number,execution_time_seconds" >clickbench/results.csv
 query_num=1
@@ -14,7 +15,7 @@ cat clickbench/queries.sql | while read -r query; do
     snowsql "$query"
     end_time=$(date +%s.%N)
     execution_time=$(awk "BEGIN {print $end_time - $start_time}")
-    echo "$query_num,$execution_time" >>clickbench/results.csv
+    echo "$query_num,$execution_time" >>clickbench/results_file.csv
     query_num=$((query_num + 1))
   fi
 done

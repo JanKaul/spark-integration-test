@@ -1,35 +1,14 @@
-export SNOWFLAKE_HOME=$(pwd)
+source ./make.sh
+source ./clickbench.sh
 
-source ./venv.sh
+up
+setup
 
-if [ ! -d "clickbench" ]; then
-  mkdir clickbench
-  mkdir -p clickbench/partitioned
-  mkdir -p clickbench/single
-fi
+cb_create_table
+cb_copy_into_partitioned_n 0
+cb_copy_into_partitioned_n 1
 
-volume_local_file() {
-  snow sql -q "CREATE EXTERNAL VOLUME 'local'
-  STORAGE_LOCATIONS = 
-  (
-    (
-      NAME = 'local'
-      STORAGE_PROVIDER = 'file'
-      STORAGE_BASE_URL = '$(pwd)/clickbench'
-    )
-  )"
-}
-
-cp_download_partitioned() {
-  seq 0 99 | xargs -P100 -I{} bash -c 'wget --directory-prefix clickbench/partitioned --continue --progress=dot:giga https://datasets.clickhouse.com/hits_compatible/athena_partitioned/hits_{}.parquet'
-}
-
-cb_download_single() {
-  wget --directory-prefix clickbench/single --continue --progress=dot:giga https://datasets.clickhouse.com/hits_compatible/hits.parquet
-}
-
-cb_create_table() {
-  snow sql -q "CREATE TABLE demo.embucket.hits
+snowsql "CREATE TABLE demo.embucket.source
 (
     WatchID BIGINT NOT NULL,
     JavaEnable SMALLINT NOT NULL,
@@ -137,72 +116,7 @@ cb_create_table() {
     URLHash BIGINT NOT NULL,
     CLID INTEGER NOT NULL
 );"
-}
 
-cb_copy_into_partitioned_small() {
-  cb_copy_into_partitioned_n 0
-}
+snowsql "COPY INTO demo.embucket.source FROM 'file:///storage/clickbench/partitioned/hits_1.parquet' STORAGE_INTEGRATION = local FILE_FORMAT = (TYPE = PARQUET);"
 
-cb_copy_into_partitioned_n() {
-  local n=$1
-  snow sql -q "COPY INTO demo.embucket.hits FROM 'file:///storage/clickbench/partitioned/hits_$n.parquet' STORAGE_INTEGRATION = local FILE_FORMAT = (TYPE = PARQUET);"
-}
-
-cb_copy_into_partitioned() {
-  snow sql -q "COPY INTO demo.embucket.hits FROM 'file:///storage/clickbench/partitioned/' STORAGE_INTEGRATION = local FILE_FORMAT = (TYPE = PARQUET);"
-}
-
-cb_copy_into_single() {
-  snow sql -q "COPY INTO demo.embucket.hits FROM 'file:///storage/clickbench/single/' STORAGE_INTEGRATION = local FILE_FORMAT = (TYPE = PARQUET);"
-}
-
-cb_copy_into_partitioned_file() {
-  snow sql -q "COPY INTO demo.embucket.hits FROM 'file://$(pwd)/clickbench/partitioned/' STORAGE_INTEGRATION = local FILE_FORMAT = (TYPE = PARQUET);"
-}
-
-cb_copy_into_partitioned_n_file() {
-  local n=$1
-  snow sql -q "COPY INTO demo.embucket.hits FROM 'file://$(pwd)/clickbench/partitioned/hits_$n.parquet' STORAGE_INTEGRATION = local FILE_FORMAT = (TYPE = PARQUET);"
-}
-
-clickbench_partitioned() {
-  cb_create_table
-  cb_copy_into_partitioned
-}
-
-clickbench_partitioned_small() {
-  cb_create_table
-  cb_copy_into_partitioned_small
-}
-
-clickbench_single() {
-  cb_create_table
-  cb_copy_into_single
-}
-
-clickbench_spark() {
-  docker exec spark-iceberg spark-submit /home/iceberg/create_iceberg.py
-}
-
-clickbench_spark_partitioned() {
-  docker exec spark-iceberg spark-submit /home/iceberg/create_iceberg_partitioned.py
-}
-
-benchmark() {
-  echo "query_number,execution_time_seconds" >clickbench/results.csv
-  query_num=1
-  cat clickbench/queries.sql | while read -r query; do
-    if [[ -n "$query" && ! "$query" =~ ^[[:space:]]*$ ]]; then
-      start_time=$(date +%s.%N)
-      snow sql -q "$query"
-      end_time=$(date +%s.%N)
-      execution_time=$(awk "BEGIN {print $end_time - $start_time}")
-      echo "$query_num,$execution_time" >>clickbench/results.csv
-      query_num=$((query_num + 1))
-    fi
-  done
-}
-
-activate
-
-if [ -n "$1" ]; then "$1" "${2:0}"; fi
+snowsql "MERGE INTO demo.embucket.hits target USING demo.embucket.source source ON target.watchid = source.watchid WHEN MATCHED THEN UPDATE SET eventdate = source.eventdate + 365 WHEN NOT MATCHED THEN INSERT (watchid, eventdate) VALUES (source.watchid, source.eventdate);"
