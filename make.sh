@@ -15,17 +15,34 @@ down() {
 }
 
 volume() {
-  snow sql -q "CREATE EXTERNAL VOLUME 'mybucket'
+  snow sql -q "CREATE EXTERNAL VOLUME 'bucket'
   STORAGE_LOCATIONS = 
   (
     (
-      NAME = 'mybucket'
+      NAME = 'bucket'
       STORAGE_PROVIDER = 's3'
       STORAGE_BASE_URL = 'mybucket'
       STORAGE_ENDPOINT = 'http://warehouse.minio:9000'
       CREDENTIALS = (
         AWS_KEY_ID = 'AKIAIOSFODNN7EXAMPLE'
         AWS_SECRET_KEY = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
+        REGION = 'us-east-2'
+      )
+    )
+  )"
+}
+
+volume_s3() {
+  snow sql -q "CREATE EXTERNAL VOLUME 'bucket'
+  STORAGE_LOCATIONS = 
+  (
+    (
+      NAME = 'bucket'
+      STORAGE_PROVIDER = 's3'
+      STORAGE_BASE_URL = 'jan-embucket'
+      CREDENTIALS = (
+        AWS_KEY_ID = '$AWS_ACCESS_KEY_ID'
+        AWS_SECRET_KEY = '$AWS_SECRET_ACCESS_KEY'
         REGION = 'us-east-2'
       )
     )
@@ -45,7 +62,7 @@ volume_local() {
 }
 
 database() {
-  snow sql -q "CREATE DATABASE demo EXTERNAL_VOLUME = 'mybucket';"
+  snow sql -q "CREATE DATABASE demo EXTERNAL_VOLUME = 'bucket';"
 }
 
 volume_file() {
