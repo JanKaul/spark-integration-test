@@ -7,11 +7,11 @@ install_snowflake() {
 }
 
 up() {
-  docker compose up -d
+  podman compose up -d
 }
 
 down() {
-  docker compose down -v
+  podman compose down -v
 }
 
 volume() {
@@ -103,7 +103,7 @@ snowsql() {
 }
 
 sparksql() {
-  docker exec spark-iceberg spark-sql -e "$1"
+  podman exec spark-iceberg spark-sql -e "$1"
 }
 
 equality() {
