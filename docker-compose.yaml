@@ -86,15 +86,47 @@ services:
       - warehouse_data:/warehouse
     networks:
       iceberg_net:
+    command: ['server', '/warehouse', '--console-address', ':9001']
+  toxiproxy:
+    image: ghcr.io/shopify/toxiproxy:2.5.0
+    container_name: toxiproxy
+    depends_on:
+      - minio
+    networks:
+      iceberg_net:
         aliases:
           - warehouse.minio
     ports:
-      - 9001:9001
-      - 9000:9000
-    command: ['server', '/warehouse', '--console-address', ':9001']
+      - 8474:8474  # Toxiproxy API
+      - 9000:9000  # Proxied MinIO API
+      - 9001:9001  # Proxied MinIO Console
+  toxiproxy-config:
+    image: curlimages/curl:latest
+    container_name: toxiproxy-config
+    depends_on:
+      - toxiproxy
+    networks:
+      - iceberg_net
+    restart: "no"
+    command:
+      - sh
+      - -c
+      - |
+        echo 'Waiting for Toxiproxy to be ready...'
+        until curl -s http://toxiproxy:8474/version; do sleep 1; done
+        echo 'Toxiproxy is ready, configuring proxies...'
+
+        curl -X POST http://toxiproxy:8474/proxies -H 'Content-Type: application/json' -d '{"name":"minio-api","listen":"0.0.0.0:9000","upstream":"minio:9000"}'
+
+        curl -X POST http://toxiproxy:8474/proxies -H 'Content-Type: application/json' -d '{"name":"minio-console","listen":"0.0.0.0:9001","upstream":"minio:9001"}'
+
+        echo 'Adding latency toxic to minio-api proxy...'
+        curl -X POST http://toxiproxy:8474/proxies/minio-api/toxics -H 'Content-Type: application/json' -d '{"name":"latency","type":"latency","attributes":{"latency":20,"jitter":5}}'
+
+        echo 'Toxiproxy configuration completed!'
   mc:
     depends_on:
-      - minio
+      - toxiproxy-config
     image: minio/mc
     container_name: mc
     networks:
