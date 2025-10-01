@@ -19,4 +19,4 @@ cat clickbench/queries.sql | while read -r query; do
   fi
 done
 
-down
+# down

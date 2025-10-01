@@ -1,0 +1,9 @@
+export OBJECT_STORE_BACKEND=s3
+export SLATEDB_PREFIX=data/
+export AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+export AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+export AWS_REGION=us-east-2
+export S3_BUCKET=mybucket
+export S3_ENDPOINT=http://127.0.0.1:9000
+export S3_ALLOW_HTTP=true
+export CATALOG_URL=http://127.0.0.1:3000/catalog

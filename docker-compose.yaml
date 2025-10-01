@@ -1,55 +1,55 @@
 services:
-  spark-iceberg:
-    image: tabulario/spark-iceberg
-    container_name: spark-iceberg
-    build: spark/
-    networks:
-      iceberg_net:
-    depends_on:
-      - embucket
-      - minio
-    volumes:
-      - warehouse_data:/home/iceberg/warehouse
-      - notebooks_data:/home/iceberg/notebooks/notebooks
-      - spark_events:/home/iceberg/spark-events
-      - ./scripts/create_iceberg.py:/home/iceberg/create_iceberg.py
-      - ./scripts/create_iceberg_partitioned.py:/home/iceberg/create_iceberg_partitioned.py
-      - ./clickbench/partitioned:/home/iceberg/partitioned
-      - ./clickbench/single:/home/iceberg/single
-    environment:
-      - AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
-      - AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-      - AWS_REGION=us-east-2
-      - SPARK_DRIVER_MEMORY=16g
-      - SPARK_EXECUTOR_MEMORY=16g
-    ports:
-      - 8888:8888
-      # - 8080:8080
-      # - 10000:10000
-      # - 10001:10001
-    entrypoint: /bin/sh
-    command: >
-      -c "
-      echo \"
-        spark.sql.extensions                   org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions \\n
-        spark.sql.catalog.demo                 org.apache.iceberg.spark.SparkCatalog \\n
-        spark.sql.catalog.demo.catalog-impl    org.apache.iceberg.rest.RESTCatalog \\n
-        spark.sql.catalog.demo.uri             http://embucket:3000/catalog \\n
-        spark.sql.catalog.demo.io-impl         org.apache.iceberg.aws.s3.S3FileIO \\n
-        spark.sql.catalog.demo.warehouse       demo \\n
-        spark.sql.catalog.demo.cache-enabled   false \\n
-        spark.sql.catalog.demo.rest.access-key-id  AKIAIOSFODNN7EXAMPLE \\n
-        spark.sql.catalog.demo.rest.secret-access-key wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY \\n
-        spark.sql.catalog.demo.rest.signing-region us-east-2 \\n
-        spark.sql.catalog.demo.rest.sigv4-enabled  true \\n
-        spark.sql.catalog.demo.s3.endpoint     http://warehouse.minio:9000 \\n
-        spark.sql.defaultCatalog               demo \\n
-        spark.eventLog.enabled                 true \\n 
-        spark.eventLog.dir                     /home/iceberg/spark-events \\n
-        spark.history.fs.logDirectory          /home/iceberg/spark-events \\n
-        spark.sql.catalog.demo.s3.path-style-access  true \\n
-      \" > /opt/spark/conf/spark-defaults.conf && ./entrypoint.sh notebook
-      "
+  # spark-iceberg:
+  #   image: tabulario/spark-iceberg
+  #   container_name: spark-iceberg
+  #   build: spark/
+  #   networks:
+  #     iceberg_net:
+  #   depends_on:
+  #     - embucket
+  #     - minio
+  #   volumes:
+  #     - warehouse_data:/home/iceberg/warehouse
+  #     - notebooks_data:/home/iceberg/notebooks/notebooks
+  #     - spark_events:/home/iceberg/spark-events
+  #     - ./scripts/create_iceberg.py:/home/iceberg/create_iceberg.py
+  #     - ./scripts/create_iceberg_partitioned.py:/home/iceberg/create_iceberg_partitioned.py
+  #     - ./clickbench/partitioned:/home/iceberg/partitioned
+  #     - ./clickbench/single:/home/iceberg/single
+  #   environment:
+  #     - AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+  #     - AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+  #     - AWS_REGION=us-east-2
+  #     - SPARK_DRIVER_MEMORY=16g
+  #     - SPARK_EXECUTOR_MEMORY=16g
+  #   ports:
+  #     - 8888:8888
+  #     # - 8080:8080
+  #     # - 10000:10000
+  #     # - 10001:10001
+  #   entrypoint: /bin/sh
+  #   command: >
+  #     -c "
+  #     echo \"
+  #       spark.sql.extensions                   org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions \\n
+  #       spark.sql.catalog.demo                 org.apache.iceberg.spark.SparkCatalog \\n
+  #       spark.sql.catalog.demo.catalog-impl    org.apache.iceberg.rest.RESTCatalog \\n
+  #       spark.sql.catalog.demo.uri             http://embucket:3000/catalog \\n
+  #       spark.sql.catalog.demo.io-impl         org.apache.iceberg.aws.s3.S3FileIO \\n
+  #       spark.sql.catalog.demo.warehouse       demo \\n
+  #       spark.sql.catalog.demo.cache-enabled   false \\n
+  #       spark.sql.catalog.demo.rest.access-key-id  AKIAIOSFODNN7EXAMPLE \\n
+  #       spark.sql.catalog.demo.rest.secret-access-key wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY \\n
+  #       spark.sql.catalog.demo.rest.signing-region us-east-2 \\n
+  #       spark.sql.catalog.demo.rest.sigv4-enabled  true \\n
+  #       spark.sql.catalog.demo.s3.endpoint     http://warehouse.minio:9000 \\n
+  #       spark.sql.defaultCatalog               demo \\n
+  #       spark.eventLog.enabled                 true \\n 
+  #       spark.eventLog.dir                     /home/iceberg/spark-events \\n
+  #       spark.history.fs.logDirectory          /home/iceberg/spark-events \\n
+  #       spark.sql.catalog.demo.s3.path-style-access  true \\n
+  #     \" > /opt/spark/conf/spark-defaults.conf && ./entrypoint.sh notebook
+  #     "
   embucket:
     image: embucket/embucket
     container_name: embucket
@@ -72,10 +72,12 @@ services:
       - S3_ALLOW_HTTP=true
       - CATALOG_URL=http://embucket:3000/catalog
       - RUST_LOG=info
+      - DATAFUSION_EXPLAIN_SHOW_STATISTICS=true
     volumes:
       - tmp_data:/tmp
       - ./clickbench/partitioned:/storage/clickbench/partitioned
       - ./clickbench/single:/storage/clickbench/single
+      - ./tpch/100:/storage/tpch/100
   minio:
     image: minio/minio
     container_name: minio
